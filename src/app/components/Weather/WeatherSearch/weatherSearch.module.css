@@ -6,11 +6,13 @@
 .searchContainer {
     display: flex;
     gap: 10px;
+    margin-bottom: 16px;
 
     input {
         width: 30vh;
         padding: 10px;
         border: 1px solid #b7b7b7;
+        background-color: #ffffff;
         border-radius: 10px;
     }
 
@@ -26,4 +28,10 @@
             background-color: #5a8ac0;
         }
     }
+}
+
+.resultsContainer {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
 }

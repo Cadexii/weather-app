@@ -2,8 +2,8 @@ import Container from "../components/Container/Container";
 
 export default function Dashboard() {
   return (
-    <Container isGrid>
-      <h2>Saved Weathers</h2>
+    <Container isGrid title="Your Places:">
+      <h2>No Places Saved</h2>
     </Container>
   );
 }
