@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.searchContainer {
+    display: flex;
+    gap: 10px;
+
+    input {
+        width: 30vh;
+        padding: 10px;
+        border: 1px solid #b7b7b7;
+        border-radius: 10px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #7ba7d4;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #5a8ac0;
+        }
+    }
+}
