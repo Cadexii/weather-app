@@ -1,0 +1,16 @@
+.container, .grid {
+    background-color: #eaeaea;
+    margin: 30px;
+    border-radius: 30px;
+    overflow: auto;
+    padding: 30px;
+}
+
+.container {
+    height: calc(100vh - 180px);
+}
+
+.grid {
+    height: 350px;
+    margin-bottom: 0;
+}
