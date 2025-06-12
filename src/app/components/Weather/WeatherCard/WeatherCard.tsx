@@ -12,7 +12,7 @@ type Props = {
   temperature: number;
   weather: string;
   isAdded: boolean;
-  onAddRemove?: () => void;
+  onAddRemove: () => void;
 };
 
 const WeatherCard: React.FC<Props> = ({
