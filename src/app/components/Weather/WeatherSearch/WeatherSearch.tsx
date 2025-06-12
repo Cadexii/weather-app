@@ -6,6 +6,8 @@ import { fetchWeather } from "@/app/api/fetchWeather";
 import { geocodeCity } from "@/app/api/geocodeCity";
 import WeatherCard from "../WeatherCard/WeatherCard";
 import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 type WeatherProps = {
   current_weather: {
@@ -62,7 +64,14 @@ const WeatherSearch = () => {
         </button>
       </div>
       <div className={styles.resultsContainer}>
-        {loading && <p>Loading...</p>}
+        {loading && (
+          <Skeleton
+            height={154}
+            borderRadius={20}
+            baseColor="#e0e0e0"
+            highlightColor="#f5f5f5"
+          />
+        )}
         {error && <p className={styles.error}>{error}</p>}
         {weatherData && (
           <WeatherCard
