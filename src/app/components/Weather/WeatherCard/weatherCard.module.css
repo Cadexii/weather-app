@@ -4,6 +4,7 @@
     align-items: center;
     flex-direction: column;
     background-color: #ffffff;
+    height: 150px;
     border-radius: 20px;
     padding: 20px;
 
@@ -13,7 +14,7 @@
         font-size: 20px;
         font-weight: 600;
     }
-    
+
     p {
         color: #666666;
         font-size: 16px;
