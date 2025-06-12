@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import styles from "./weatherCard.module.css";
 import { Icon } from "@iconify/react";
 
@@ -18,6 +21,8 @@ const WeatherCard: React.FC<Props> = ({
   temperature,
   weather,
 }) => {
+  const [hovering, setHovering] = useState(false);
+
   return (
     <div
       className={styles.container}
@@ -26,7 +31,21 @@ const WeatherCard: React.FC<Props> = ({
         borderBottom: `5px solid ${borderColor}`,
       }}
     >
-      <Icon icon={weatherIcon} width={50} />
+      <button
+        className={styles.addRemove}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+      >
+        <Icon
+          icon={
+            hovering
+              ? "material-symbols:add-circle-rounded"
+              : "material-symbols:add-circle-outline-rounded"
+          }
+          width={25}
+        />
+      </button>
+      <Icon icon={weatherIcon} width={50} height={50} />
       <p>
         {city}, {country}
       </p>
