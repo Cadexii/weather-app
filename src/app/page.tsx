@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/app/components/Contexts/AuthProvider";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
@@ -8,14 +8,24 @@ import { Icon } from "@iconify/react";
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (user) {
       router.push("/dashboard");
     } else {
       router.push("/login");
     }
-  }, [user, router]);
+  }, [user, router, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div
