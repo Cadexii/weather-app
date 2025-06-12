@@ -42,7 +42,6 @@ const WeatherSearch = () => {
       setWeatherData(weather);
       setLoading(false);
       setInput("");
-      console.log(weather);
     } catch {
       setError("Failed to find weather, please try again.");
       setLoading(false);

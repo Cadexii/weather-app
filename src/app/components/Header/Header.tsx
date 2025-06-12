@@ -3,6 +3,7 @@
 import styles from "./header.module.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "../Contexts/AuthProvider";
 
 const navigationItems = [
   { name: "Dashboard", href: "/dashboard" },
@@ -11,6 +12,7 @@ const navigationItems = [
 
 const Header = () => {
   const pathname = usePathname();
+  const { logOut } = useAuth();
 
   const getLinkClass = (path: string) => {
     return `${styles.item} ${pathname === path && styles.isActive}`;
@@ -26,7 +28,9 @@ const Header = () => {
         ))}
       </div>
       <div className={styles.itemsContainer}>
-        <p className={styles.item}>Log out</p>
+        <p className={styles.item} onClick={logOut}>
+          Log out
+        </p>
       </div>
     </div>
   );
