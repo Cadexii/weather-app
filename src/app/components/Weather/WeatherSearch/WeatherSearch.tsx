@@ -81,6 +81,7 @@ const WeatherSearch = () => {
             country={country}
             temperature={weatherData.current_weather.temperature}
             weather={label}
+            isAdded={false} // Placeholder, implement add/remove logic if needed
           />
         )}
       </div>

@@ -1,7 +1,12 @@
-import styles from "./savedWeatherDisplay.module.css";
+"use client";
+
+import { useState } from "react";
 import WeatherCard from "../WeatherCard/WeatherCard";
 
 const SavedWeatherDisplay = () => {
+  const [savedPlaced, setSavedPlaces] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
     <>
       <WeatherCard
@@ -11,6 +16,7 @@ const SavedWeatherDisplay = () => {
         temperature={23}
         weather="Sunny"
         weatherIcon="mdi:weather-sunny"
+        isAdded={true}
       />
     </>
   );
