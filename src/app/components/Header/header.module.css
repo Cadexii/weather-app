@@ -13,13 +13,21 @@
     gap: 1rem;
 }
 
-.item, .isActive {
+.item, .titleItem, .isActive {
     color: #ffffff;
     padding: 10px 20px;
     border-radius: 5px;
+}
+
+.item, .isActive {
     &:hover {
         cursor: pointer;
     }
+} 
+
+.titleItem {
+    margin: 0 auto;
+    font-weight: bold;
 }
 
 .isActive {
