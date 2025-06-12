@@ -11,6 +11,8 @@ type Props = {
   country: string;
   temperature: number;
   weather: string;
+  isAdded: boolean;
+  onAddRemove?: () => void;
 };
 
 const WeatherCard: React.FC<Props> = ({
@@ -20,6 +22,8 @@ const WeatherCard: React.FC<Props> = ({
   country,
   temperature,
   weather,
+  isAdded,
+  onAddRemove,
 }) => {
   const [hovering, setHovering] = useState(false);
 
@@ -35,10 +39,15 @@ const WeatherCard: React.FC<Props> = ({
         className={styles.addRemove}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
+        onClick={onAddRemove}
       >
         <Icon
           icon={
-            hovering
+            isAdded
+              ? hovering
+                ? "ic:round-remove-circle"
+                : "ic:round-remove-circle-outline"
+              : hovering
               ? "material-symbols:add-circle-rounded"
               : "material-symbols:add-circle-outline-rounded"
           }
