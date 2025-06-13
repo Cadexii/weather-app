@@ -83,22 +83,18 @@ const WeatherSearch = () => {
 
   const handleFavoritePlace = async () => {
     if (user) {
-      if (added) {
+      const placeId = weatherData?.id;
+      if (placeId) {
         if (favorite) {
-          const placeId = weatherData?.id;
-          if (placeId) {
-            await removeFavoritePlace(placeId, user.uid);
-            setFavorite(false);
-          }
+          await removeFavoritePlace(placeId, user.uid);
+          setFavorite(false);
         } else {
-          const newPlaceId = await addFavoritePlace(
+          await addFavoritePlace(
             {
               place: city || country,
             },
             user.uid
           );
-
-          setWeatherData((prev) => (prev ? { ...prev, id: newPlaceId } : null));
           setFavorite(true);
         }
       }
@@ -123,6 +119,12 @@ const WeatherSearch = () => {
           (place) => place.place === geo.name || place.place === geo.country
         );
         docId = found?.id || "";
+
+        const favoritePlaces = await getFavoritePlaces(user.uid);
+        const isFavorite = (favoritePlaces ?? []).some(
+          (place) => place.place === geo.name || place.place === geo.country
+        );
+        setFavorite(isFavorite);
       }
       setWeatherData({
         ...weather,
@@ -130,21 +132,6 @@ const WeatherSearch = () => {
       });
       setLoading(false);
       setInput("");
-
-      if (user) {
-        const savedPlaces = await getPlaces(user.uid);
-        const favoritePlaces = await getFavoritePlaces(user.uid);
-        setAdded(
-          (savedPlaces ?? []).some(
-            (place) => place.place === geo.name || place.place === geo.country
-          )
-        );
-        setFavorite(
-          (favoritePlaces ?? []).some(
-            (place) => place.place === geo.name || place.place === geo.country
-          )
-        );
-      }
     } catch {
       setError("Failed to find weather, please try again.");
       setLoading(false);
