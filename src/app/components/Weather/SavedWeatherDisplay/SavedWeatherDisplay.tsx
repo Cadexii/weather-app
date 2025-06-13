@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../Contexts/AuthProvider";
-import { getPlaces } from "@/app/utils/firestoreService";
+import { getPlaces, removePlace } from "@/app/utils/firestoreService";
 import { fetchWeather } from "@/app/api/fetchWeather";
 import { geocodeCity } from "@/app/api/geocodeCity";
 import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
@@ -11,6 +11,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 type WeatherProps = {
+  id?: string;
   current_weather: {
     city: string;
     country: string;
@@ -31,6 +32,20 @@ const SavedWeatherDisplay = () => {
   const [weatherData, setWeatherData] = useState<(WeatherProps | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+
+  const handleRemovePlace = async (placeId: string) => {
+    if (user) {
+      await removePlace(placeId, user.uid);
+      setSavedPlaces((prevPlaces) =>
+        prevPlaces.filter((place) => place.id !== placeId)
+      );
+      setWeatherData((prevWeather) =>
+        prevWeather.filter(
+          (_, index) => index !== savedPlaces.findIndex((p) => p.id === placeId)
+        )
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchSavedPlaces = async () => {
@@ -109,9 +124,7 @@ const SavedWeatherDisplay = () => {
                 temperature={weatherInfo?.current_weather.temperature || 0}
                 weather={label}
                 isAdded={true}
-                onAddRemove={() => {
-                  console.log("Remove logic not implemented yet");
-                }}
+                onAddRemove={() => handleRemovePlace(place.id || "")}
               />
             );
           })}
