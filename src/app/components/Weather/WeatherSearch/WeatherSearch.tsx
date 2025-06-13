@@ -9,9 +9,10 @@ import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useAuth } from "../../Contexts/AuthProvider";
-import { addPlace, getPlaces } from "@/app/utils/firestoreService";
+import { addPlace, getPlaces, removePlace } from "@/app/utils/firestoreService";
 
 type WeatherProps = {
+  id?: string;
   current_weather: {
     city: string;
     country: string;
@@ -53,14 +54,21 @@ const WeatherSearch = () => {
   const handleAddRemovePlace = async () => {
     if (user) {
       if (added) {
-        console.log("Place already added, remove logic not implemented yet.");
+        const placeId = weatherData?.id;
+        if (placeId) {
+          await removePlace(placeId, user.uid);
+          setAdded(false);
+        } else {
+        }
       } else {
-        await addPlace(
+        const newPlaceId = await addPlace(
           {
             place: city || country,
           },
           user.uid
         );
+
+        setWeatherData((prev) => (prev ? { ...prev, id: newPlaceId } : null));
         setAdded(true);
       }
     }
@@ -76,7 +84,19 @@ const WeatherSearch = () => {
       const weather = await fetchWeather(geo.lat, geo.lon);
       setCity(geo.name);
       setCountry(geo.country);
-      setWeatherData(weather);
+
+      let docId = "";
+      if (user) {
+        const savedPlaces = await getPlaces(user.uid);
+        const found = (savedPlaces ?? []).find(
+          (place) => place.place === geo.name || place.place === geo.country
+        );
+        docId = found?.id || "";
+      }
+      setWeatherData({
+        ...weather,
+        id: docId,
+      });
       setLoading(false);
       setInput("");
 

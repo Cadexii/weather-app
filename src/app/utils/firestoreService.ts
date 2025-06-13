@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 
 type Place = {
     id?: string;
@@ -11,14 +11,25 @@ const getPlacesCollection = (userId: string) => {
     return `users/${userId}/places`;
 };
 
-export const addPlace = async ({place}: Place, userId: string): Promise<void> => {
+export const addPlace = async ({place}: Place, userId: string): Promise<string | undefined> => {
     const placesCollection = getPlacesCollection(userId);
     if (!placesCollection) return;
-    await addDoc(collection(db, placesCollection), {
+
+    const docRef = await addDoc(collection(db, placesCollection), {
         place: place,
         addedAt: new Date()
     });
+    
+    return docRef.id;
 };
+
+export const removePlace = async (placeId: string, userId: string): Promise<void> => {
+    const placesCollection = getPlacesCollection(userId);
+    if (!placesCollection || !placeId) return;
+
+    const placeDoc = doc(db, placesCollection, placeId);
+    await deleteDoc(placeDoc)
+}
 
 export const getPlaces = async (userId: string) => {
     const savedPlaces: Place[] = [];

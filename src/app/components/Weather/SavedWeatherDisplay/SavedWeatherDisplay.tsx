@@ -39,7 +39,6 @@ const SavedWeatherDisplay = () => {
       setIsLoading(true);
 
       const places = await getPlaces(user.uid);
-      console.log("Fetched Saved Places:", places);
       setSavedPlaces(places ?? []);
 
       const weatherPromises = (places ?? []).map(async (place) => {
