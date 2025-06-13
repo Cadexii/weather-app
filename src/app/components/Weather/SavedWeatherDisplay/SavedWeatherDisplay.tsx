@@ -1,23 +1,112 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../Contexts/AuthProvider";
+import { getPlaces } from "@/app/utils/firestoreService";
+import { fetchWeather } from "@/app/api/fetchWeather";
+import { geocodeCity } from "@/app/api/geocodeCity";
+import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import WeatherCard from "../WeatherCard/WeatherCard";
 
+type WeatherProps = {
+  current_weather: {
+    city: string;
+    country: string;
+    temperature: number;
+    weathercode: number;
+    latitude: number;
+    longitude: number;
+  };
+};
+
+type Place = {
+  id?: string;
+  place: string;
+};
+
 const SavedWeatherDisplay = () => {
-  const [savedPlaced, setSavedPlaces] = useState([]);
+  const [savedPlaces, setSavedPlaces] = useState<Place[]>([]);
+  const [weatherData, setWeatherData] = useState<(WeatherProps | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchSavedPlaces = async () => {
+      if (!user) return null;
+
+      setIsLoading(true);
+
+      const places = await getPlaces(user.uid);
+      console.log("Fetched Saved Places:", places);
+      setSavedPlaces(places ?? []);
+
+      const weatherPromises = (places ?? []).map(async (place) => {
+        const geo = await geocodeCity(place.place);
+        const weather = await fetchWeather(geo.lat, geo.lon);
+        return {
+          ...weather,
+          current_weather: {
+            ...weather.current_weather,
+            city: place.place,
+            country: geo.country,
+            temperature: weather.current_weather.temperature,
+            weathercode: weather.current_weather.weathercode,
+            latitude: geo.lat,
+            longitude: geo.lon,
+          },
+        };
+      });
+
+      const weatherResults = await Promise.all(weatherPromises);
+      setWeatherData(weatherResults);
+      setIsLoading(false);
+    };
+    fetchSavedPlaces();
+  }, [user]);
 
   return (
     <>
-      <WeatherCard
-        borderColor="yellow"
-        city="Warsaw"
-        country="Poland"
-        temperature={23}
-        weather="Sunny"
-        weatherIcon="mdi:weather-sunny"
-        isAdded={true}
-      />
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        savedPlaces.length > 0 &&
+        savedPlaces.map((place, index) => {
+          const weatherInfo = weatherData[index];
+
+          const label =
+            weatherInfo &&
+            weatherCodeMap[weatherInfo.current_weather.weathercode]
+              ? weatherCodeMap[weatherInfo.current_weather.weathercode].label
+              : "Unknown";
+          const icon =
+            weatherInfo &&
+            weatherCodeMap[weatherInfo.current_weather.weathercode]
+              ? weatherCodeMap[weatherInfo.current_weather.weathercode].icon
+              : "mdi:weather-sunny";
+          const borderColor =
+            weatherInfo &&
+            weatherCodeMap[weatherInfo.current_weather.weathercode]
+              ? weatherCodeMap[weatherInfo.current_weather.weathercode]
+                  .borderColor
+              : "#ccc";
+
+          return (
+            <WeatherCard
+              key={place.id}
+              borderColor={borderColor}
+              weatherIcon={icon}
+              city={weatherInfo?.current_weather.city || place.place}
+              country={weatherInfo?.current_weather.country || "Unknown"}
+              temperature={weatherInfo?.current_weather.temperature || 0}
+              weather={label}
+              isAdded={true}
+              onAddRemove={() => {
+                console.log("Remove logic not implemented yet");
+              }}
+            />
+          );
+        })
+      )}
     </>
   );
 };

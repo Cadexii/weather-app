@@ -1,38 +1,31 @@
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { collection, addDoc, getDocs, query } from 'firebase/firestore';
 
 type Place = {
     id?: string;
-    city: string;
-    country: string;
-    lat: number;
-    lon: number;
+    place: string;
 }
-const getPlacesCollection = () => {
-    const user = getAuth().currentUser;
-    if (!user) return null;
-    return `users/${user.uid}/places`;
+
+const getPlacesCollection = (userId: string) => {
+    if (!userId) return null;
+    return `users/${userId}/places`;
 };
 
-export const addPlace = async ({city, country, lat, lon}: Place): Promise<void> => {
-    const placesCollection = getPlacesCollection();
+export const addPlace = async ({place}: Place, userId: string): Promise<void> => {
+    const placesCollection = getPlacesCollection(userId);
     if (!placesCollection) return;
     await addDoc(collection(db, placesCollection), {
-        city,
-        country,
-        lat,    
-        lon,
+        place: place,
     });
 };
 
 export const getPlaces = async (userId: string) => {
     const savedPlaces: Place[] = [];
-    const placesCollection = getPlacesCollection();
+    const placesCollection = getPlacesCollection(userId);
     if (!placesCollection) return;
-    const q = query(collection(db, placesCollection), where("userId", "==", userId));
-
+    const q = query(collection(db, placesCollection));
     const querySnapshot = await getDocs(q);
+    
     querySnapshot.forEach((doc) => {
         savedPlaces.push({...doc.data(), id: doc.id} as Place);
     });

@@ -42,7 +42,7 @@ const WeatherSearch = () => {
       if (user && (city || country)) {
         const savedPlaces = await getPlaces(user.uid);
         const isSaved = (savedPlaces ?? []).some(
-          (place) => place.city === city || place.country === country
+          (place) => place.place === city || place.place === country
         );
         setAdded(isSaved);
       }
@@ -55,12 +55,12 @@ const WeatherSearch = () => {
       if (added) {
         console.log("Place already added, remove logic not implemented yet.");
       } else {
-        await addPlace({
-          city: city,
-          country: country,
-          lat: weatherData?.current_weather.latitude || 0,
-          lon: weatherData?.current_weather.longitude || 0,
-        });
+        await addPlace(
+          {
+            place: city || country,
+          },
+          user.uid
+        );
         setAdded(true);
       }
     }
@@ -84,7 +84,7 @@ const WeatherSearch = () => {
         const savedPlaces = await getPlaces(user.uid);
         setAdded(
           (savedPlaces ?? []).some(
-            (place) => place.city === geo.name || place.country === geo.country
+            (place) => place.place === geo.name || place.place === geo.country
           )
         );
       }
