@@ -7,6 +7,8 @@ import { fetchWeather } from "@/app/api/fetchWeather";
 import { geocodeCity } from "@/app/api/geocodeCity";
 import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import WeatherCard from "../WeatherCard/WeatherCard";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 type WeatherProps = {
   current_weather: {
@@ -66,47 +68,54 @@ const SavedWeatherDisplay = () => {
 
   return (
     <>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        savedPlaces.length > 0 &&
-        savedPlaces.map((place, index) => {
-          const weatherInfo = weatherData[index];
-
-          const label =
-            weatherInfo &&
-            weatherCodeMap[weatherInfo.current_weather.weathercode]
-              ? weatherCodeMap[weatherInfo.current_weather.weathercode].label
-              : "Unknown";
-          const icon =
-            weatherInfo &&
-            weatherCodeMap[weatherInfo.current_weather.weathercode]
-              ? weatherCodeMap[weatherInfo.current_weather.weathercode].icon
-              : "mdi:weather-sunny";
-          const borderColor =
-            weatherInfo &&
-            weatherCodeMap[weatherInfo.current_weather.weathercode]
-              ? weatherCodeMap[weatherInfo.current_weather.weathercode]
-                  .borderColor
-              : "#ccc";
-
-          return (
-            <WeatherCard
-              key={place.id}
-              borderColor={borderColor}
-              weatherIcon={icon}
-              city={weatherInfo?.current_weather.city || place.place}
-              country={weatherInfo?.current_weather.country || "Unknown"}
-              temperature={weatherInfo?.current_weather.temperature || 0}
-              weather={label}
-              isAdded={true}
-              onAddRemove={() => {
-                console.log("Remove logic not implemented yet");
-              }}
+      {isLoading
+        ? Array.from({ length: 2 }).map((_, index) => (
+            <Skeleton
+              key={index}
+              count={1}
+              height={150}
+              borderRadius={20}
+              baseColor="#e0e0e0"
+              highlightColor="#f5f5f5"
             />
-          );
-        })
-      )}
+          ))
+        : savedPlaces.length > 0 &&
+          savedPlaces.map((place, index) => {
+            const weatherInfo = weatherData[index];
+
+            const label =
+              weatherInfo &&
+              weatherCodeMap[weatherInfo.current_weather.weathercode]
+                ? weatherCodeMap[weatherInfo.current_weather.weathercode].label
+                : "Unknown";
+            const icon =
+              weatherInfo &&
+              weatherCodeMap[weatherInfo.current_weather.weathercode]
+                ? weatherCodeMap[weatherInfo.current_weather.weathercode].icon
+                : "mdi:weather-sunny";
+            const borderColor =
+              weatherInfo &&
+              weatherCodeMap[weatherInfo.current_weather.weathercode]
+                ? weatherCodeMap[weatherInfo.current_weather.weathercode]
+                    .borderColor
+                : "#ccc";
+
+            return (
+              <WeatherCard
+                key={place.id}
+                borderColor={borderColor}
+                weatherIcon={icon}
+                city={weatherInfo?.current_weather.city || place.place}
+                country={weatherInfo?.current_weather.country || "Unknown"}
+                temperature={weatherInfo?.current_weather.temperature || 0}
+                weather={label}
+                isAdded={true}
+                onAddRemove={() => {
+                  console.log("Remove logic not implemented yet");
+                }}
+              />
+            );
+          })}
     </>
   );
 };
