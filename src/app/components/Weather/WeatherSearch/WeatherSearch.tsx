@@ -9,7 +9,14 @@ import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useAuth } from "../../Contexts/AuthProvider";
-import { addPlace, getPlaces, removePlace } from "@/app/utils/firestoreService";
+import {
+  addFavoritePlace,
+  addPlace,
+  getFavoritePlaces,
+  getPlaces,
+  removeFavoritePlace,
+  removePlace,
+} from "@/app/utils/firestoreService";
 
 type WeatherProps = {
   id?: string;
@@ -31,6 +38,7 @@ const WeatherSearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [favorite, setFavorite] = useState(false);
   const { user } = useAuth();
 
   const { label, icon, borderColor } =
@@ -58,7 +66,6 @@ const WeatherSearch = () => {
         if (placeId) {
           await removePlace(placeId, user.uid);
           setAdded(false);
-        } else {
         }
       } else {
         const newPlaceId = await addPlace(
@@ -70,6 +77,30 @@ const WeatherSearch = () => {
 
         setWeatherData((prev) => (prev ? { ...prev, id: newPlaceId } : null));
         setAdded(true);
+      }
+    }
+  };
+
+  const handleFavoritePlace = async () => {
+    if (user) {
+      if (added) {
+        if (favorite) {
+          const placeId = weatherData?.id;
+          if (placeId) {
+            await removeFavoritePlace(placeId, user.uid);
+            setFavorite(false);
+          }
+        } else {
+          const newPlaceId = await addFavoritePlace(
+            {
+              place: city || country,
+            },
+            user.uid
+          );
+
+          setWeatherData((prev) => (prev ? { ...prev, id: newPlaceId } : null));
+          setFavorite(true);
+        }
       }
     }
   };
@@ -102,8 +133,14 @@ const WeatherSearch = () => {
 
       if (user) {
         const savedPlaces = await getPlaces(user.uid);
+        const favoritePlaces = await getFavoritePlaces(user.uid);
         setAdded(
           (savedPlaces ?? []).some(
+            (place) => place.place === geo.name || place.place === geo.country
+          )
+        );
+        setFavorite(
+          (favoritePlaces ?? []).some(
             (place) => place.place === geo.name || place.place === geo.country
           )
         );
@@ -146,7 +183,9 @@ const WeatherSearch = () => {
             temperature={weatherData.current_weather.temperature}
             weather={label}
             isAdded={added}
+            isFavorite={favorite}
             onAddRemove={handleAddRemovePlace}
+            onFavorite={handleFavoritePlace}
           />
         )}
       </div>

@@ -12,7 +12,9 @@ type Props = {
   temperature: number;
   weather: string;
   isAdded: boolean;
+  isFavorite: boolean;
   onAddRemove: () => void;
+  onFavorite: () => void;
 };
 
 const WeatherCard: React.FC<Props> = ({
@@ -23,9 +25,12 @@ const WeatherCard: React.FC<Props> = ({
   temperature,
   weather,
   isAdded,
+  isFavorite,
   onAddRemove,
+  onFavorite,
 }) => {
   const [hovering, setHovering] = useState(false);
+  const [hoveringFavorite, setHoveringFavorite] = useState(false);
 
   return (
     <div
@@ -54,6 +59,27 @@ const WeatherCard: React.FC<Props> = ({
           width={25}
         />
       </button>
+      {isAdded && (
+        <button
+          className={styles.favorite}
+          onClick={onFavorite}
+          onMouseEnter={() => setHoveringFavorite(true)}
+          onMouseLeave={() => setHoveringFavorite(false)}
+        >
+          <Icon
+            icon={
+              isFavorite
+                ? hoveringFavorite
+                  ? "material-symbols:star-outline"
+                  : "material-symbols:star"
+                : hoveringFavorite
+                ? "material-symbols:star"
+                : "material-symbols:star-outline"
+            }
+            width={25}
+          />
+        </button>
+      )}
       <Icon icon={weatherIcon} width={50} height={50} />
       <p>
         {city}, {country}
