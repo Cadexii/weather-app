@@ -13,7 +13,7 @@ type Props = {
   weather: string;
   isAdded: boolean;
   isFavorite: boolean;
-  onAddRemove: () => void;
+  onAddRemove?: () => void;
   onFavorite: () => void;
 };
 
@@ -40,25 +40,27 @@ const WeatherCard: React.FC<Props> = ({
         borderBottom: `5px solid ${borderColor}`,
       }}
     >
-      <button
-        className={styles.addRemove}
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        onClick={onAddRemove}
-      >
-        <Icon
-          icon={
-            isAdded
-              ? hovering
-                ? "ic:round-remove-circle"
-                : "ic:round-remove-circle-outline"
-              : hovering
-              ? "material-symbols:add-circle-rounded"
-              : "material-symbols:add-circle-outline-rounded"
-          }
-          width={25}
-        />
-      </button>
+      {!isFavorite && (
+        <button
+          className={styles.addRemove}
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
+          onClick={onAddRemove}
+        >
+          <Icon
+            icon={
+              isAdded
+                ? hovering
+                  ? "ic:round-remove-circle"
+                  : "ic:round-remove-circle-outline"
+                : hovering
+                ? "material-symbols:add-circle-rounded"
+                : "material-symbols:add-circle-outline-rounded"
+            }
+            width={25}
+          />
+        </button>
+      )}
       {isAdded && (
         <button
           className={styles.favorite}

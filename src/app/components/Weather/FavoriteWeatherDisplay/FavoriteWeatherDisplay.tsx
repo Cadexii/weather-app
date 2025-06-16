@@ -11,7 +11,6 @@ import "react-loading-skeleton/dist/skeleton.css";
 type Props = {
   favoritePlaces: Place[];
   onRemoveFavorite: (placeId: string) => void;
-  onRemovePlace: (placeId: string) => void;
 };
 
 type WeatherProps = {
@@ -34,7 +33,6 @@ type Place = {
 const FavoriteWeatherDisplay: React.FC<Props> = ({
   favoritePlaces,
   onRemoveFavorite,
-  onRemovePlace,
 }) => {
   const [weatherData, setWeatherData] = useState<(WeatherProps | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -113,7 +111,6 @@ const FavoriteWeatherDisplay: React.FC<Props> = ({
                 weather={label}
                 isAdded={true}
                 isFavorite={true}
-                onAddRemove={() => onRemovePlace(place.id || "")}
                 onFavorite={() => onRemoveFavorite(place.id || "")}
               />
             );

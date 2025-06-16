@@ -8,9 +8,7 @@ import SavedWeatherDisplay from "../SavedWeatherDisplay/SavedWeatherDisplay";
 import {
   addFavoritePlace,
   getFavoritePlaces,
-  getPlaces,
   removeFavoritePlace,
-  removePlace,
 } from "@/app/utils/firestoreService";
 
 type Place = {
@@ -19,7 +17,6 @@ type Place = {
 };
 
 const DisplayWeather = () => {
-  const [places, setPlaces] = useState<Place[]>([]);
   const [favoritePlaces, setFavoritePlaces] = useState<Place[]>([]);
   const { user } = useAuth();
 
@@ -54,26 +51,12 @@ const DisplayWeather = () => {
     }
   };
 
-  const removeSavedPlace = async (placeId: string) => {
-    if (user) {
-      await removePlace(placeId, user.uid);
-      await removeFavoritePlace(placeId, user.uid);
-      setPlaces((prevPlaces) =>
-        prevPlaces.filter((place) => place.id !== placeId)
-      );
-      setFavoritePlaces((prevFavorites) =>
-        prevFavorites.filter((place) => place.id !== placeId)
-      );
-    }
-  };
-
   return (
     <>
       <Container isGrid title="Favorite Places:">
         <FavoriteWeatherDisplay
           favoritePlaces={favoritePlaces}
           onRemoveFavorite={removeFavorite}
-          onRemovePlace={removeSavedPlace}
         />
       </Container>
       <Container isGrid title="Your Places:">
