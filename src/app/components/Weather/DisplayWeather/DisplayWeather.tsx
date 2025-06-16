@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Container from "../../Container/Container";
+import { useAuth } from "../../Contexts/AuthProvider";
 import FavoriteWeatherDisplay from "../FavoriteWeatherDisplay/FavoriteWeatherDisplay";
 import SavedWeatherDisplay from "../SavedWeatherDisplay/SavedWeatherDisplay";
-import { useAuth } from "../../Contexts/AuthProvider";
-import { getFavoritePlaces } from "@/app/utils/firestoreService";
+import {
+  addFavoritePlace,
+  getFavoritePlaces,
+  getPlaces,
+  removeFavoritePlace,
+  removePlace,
+} from "@/app/utils/firestoreService";
 
 type Place = {
   id?: string;
@@ -13,40 +19,69 @@ type Place = {
 };
 
 const DisplayWeather = () => {
+  const [places, setPlaces] = useState<Place[]>([]);
   const [favoritePlaces, setFavoritePlaces] = useState<Place[]>([]);
   const { user } = useAuth();
 
   useEffect(() => {
     const fetchFavoritePlaces = async () => {
       if (user) {
-        const places = await getFavoritePlaces(user.uid);
-        setFavoritePlaces(places ?? []);
+        const favorites = await getFavoritePlaces(user.uid);
+        setFavoritePlaces(favorites ?? []);
       }
     };
     fetchFavoritePlaces();
   }, [user]);
 
-  const updateFavoritePlaces = (placeId: string, isFavorite: boolean) => {
-    if (isFavorite) {
-      setFavoritePlaces((prev) => prev.filter((place) => place.id !== placeId));
-    } else {
-      const existingPlace = favoritePlaces.find(
-        (place) => place.id === placeId
+  const addFavorite = async (place: Place) => {
+    if (user) {
+      const newFavoriteId = await addFavoritePlace(place, user.uid);
+      if (newFavoriteId) {
+        setFavoritePlaces((prevFavorites) => [
+          ...prevFavorites,
+          { ...place, id: newFavoriteId },
+        ]);
+      }
+    }
+  };
+
+  const removeFavorite = async (placeId: string) => {
+    if (user) {
+      await removeFavoritePlace(placeId, user.uid);
+      setFavoritePlaces((prevFavorites) =>
+        prevFavorites.filter((place) => place.id !== placeId)
       );
-      setFavoritePlaces((prev) => [
-        ...prev,
-        { id: placeId, place: existingPlace ? existingPlace.place : "" },
-      ]);
+    }
+  };
+
+  const removeSavedPlace = async (placeId: string) => {
+    if (user) {
+      await removePlace(placeId, user.uid);
+      await removeFavoritePlace(placeId, user.uid);
+      setPlaces((prevPlaces) =>
+        prevPlaces.filter((place) => place.id !== placeId)
+      );
+      setFavoritePlaces((prevFavorites) =>
+        prevFavorites.filter((place) => place.id !== placeId)
+      );
     }
   };
 
   return (
     <>
       <Container isGrid title="Favorite Places:">
-        <FavoriteWeatherDisplay />
+        <FavoriteWeatherDisplay
+          favoritePlaces={favoritePlaces}
+          onRemoveFavorite={removeFavorite}
+          onRemovePlace={removeSavedPlace}
+        />
       </Container>
       <Container isGrid title="Your Places:">
-        <SavedWeatherDisplay />
+        <SavedWeatherDisplay
+          favoritePlaces={favoritePlaces}
+          onAddFavorite={addFavorite}
+          onRemoveFavorite={removeFavorite}
+        />
       </Container>
     </>
   );

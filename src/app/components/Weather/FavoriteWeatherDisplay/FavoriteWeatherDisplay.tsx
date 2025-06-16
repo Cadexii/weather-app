@@ -2,16 +2,17 @@
 
 import { fetchWeather } from "@/app/api/fetchWeather";
 import { geocodeCity } from "@/app/api/geocodeCity";
-import {
-  getFavoritePlaces,
-  removeFavoritePlace,
-} from "@/app/utils/firestoreService";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../Contexts/AuthProvider";
 import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import WeatherCard from "../WeatherCard/WeatherCard";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
+type Props = {
+  favoritePlaces: Place[];
+  onRemoveFavorite: (placeId: string) => void;
+  onRemovePlace: (placeId: string) => void;
+};
 
 type WeatherProps = {
   id?: string;
@@ -30,37 +31,21 @@ type Place = {
   place: string;
 };
 
-const FavoriteWeatherDisplay = () => {
-  const [favoritePlaces, setFavoritePlaces] = useState<Place[]>([]);
+const FavoriteWeatherDisplay: React.FC<Props> = ({
+  favoritePlaces,
+  onRemoveFavorite,
+  onRemovePlace,
+}) => {
   const [weatherData, setWeatherData] = useState<(WeatherProps | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
-
-  const handleRemoveFavorite = async (placeId: string) => {
-    if (user) {
-      await removeFavoritePlace(placeId, user.uid);
-      setFavoritePlaces((prevPlaces) =>
-        prevPlaces.filter((place) => place.id !== placeId)
-      );
-      setWeatherData((prevWeather) =>
-        prevWeather.filter(
-          (_, index) =>
-            index !== favoritePlaces.findIndex((p) => p.id === placeId)
-        )
-      );
-    }
-  };
 
   useEffect(() => {
-    const fetchFavoritePlaces = async () => {
-      if (!user) return null;
+    const fetchWeatherData = async () => {
+      if (!favoritePlaces.length) return;
 
       setIsLoading(true);
 
-      const places = await getFavoritePlaces(user.uid);
-      setFavoritePlaces(places ?? []);
-
-      const weatherPromises = (places ?? []).map(async (place) => {
+      const weatherPromises = favoritePlaces.map(async (place) => {
         const geo = await geocodeCity(place.place);
         const weather = await fetchWeather(geo.lat, geo.lon);
         return {
@@ -69,10 +54,6 @@ const FavoriteWeatherDisplay = () => {
             ...weather.current_weather,
             city: place.place,
             country: geo.country,
-            temperature: weather.current_weather.temperature,
-            weathercode: weather.current_weather.weathercode,
-            latitude: geo.lat,
-            longitude: geo.lon,
           },
         };
       });
@@ -81,8 +62,9 @@ const FavoriteWeatherDisplay = () => {
       setWeatherData(weatherResults);
       setIsLoading(false);
     };
-    fetchFavoritePlaces();
-  }, [user]);
+
+    fetchWeatherData();
+  }, [favoritePlaces]);
 
   return (
     <>
@@ -106,11 +88,13 @@ const FavoriteWeatherDisplay = () => {
               weatherCodeMap[weatherInfo.current_weather.weathercode]
                 ? weatherCodeMap[weatherInfo.current_weather.weathercode].label
                 : "Unknown";
+
             const weatherIcon =
               weatherInfo &&
               weatherCodeMap[weatherInfo.current_weather.weathercode]
                 ? weatherCodeMap[weatherInfo.current_weather.weathercode].icon
                 : "mdi:weather-sunny";
+
             const borderColor =
               weatherInfo &&
               weatherCodeMap[weatherInfo.current_weather.weathercode]
@@ -129,7 +113,8 @@ const FavoriteWeatherDisplay = () => {
                 weather={label}
                 isAdded={true}
                 isFavorite={true}
-                onFavorite={() => handleRemoveFavorite(place.id || "")}
+                onAddRemove={() => onRemovePlace(place.id || "")}
+                onFavorite={() => onRemoveFavorite(place.id || "")}
               />
             );
           })}
