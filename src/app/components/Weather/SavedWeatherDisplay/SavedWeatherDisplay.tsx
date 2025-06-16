@@ -18,7 +18,6 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 type WeatherProps = {
   id?: string;
-  idFavorite?: string;
   current_weather: {
     city: string;
     country: string;
