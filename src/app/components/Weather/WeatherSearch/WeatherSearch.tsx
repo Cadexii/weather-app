@@ -9,10 +9,18 @@ import { weatherCodeMap } from "@/app/utils/weatherCodeMap";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useAuth } from "../../Contexts/AuthProvider";
-import { addPlace, getPlaces, removePlace } from "@/app/utils/firestoreService";
+import {
+  addPlace,
+  addFavoritePlace,
+  getPlaces,
+  getFavoritePlaces,
+  removePlace,
+  removeFavoritePlace,
+} from "@/app/utils/firestoreService";
 
 type WeatherProps = {
   id?: string;
+  idFavorite?: string;
   current_weather: {
     city: string;
     country: string;
@@ -31,6 +39,7 @@ const WeatherSearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [favorite, setFavorite] = useState(false);
   const { user } = useAuth();
 
   const { label, icon, borderColor } =
@@ -51,6 +60,19 @@ const WeatherSearch = () => {
     checkIfPlaceSaved();
   }, [city, country, user]);
 
+  useEffect(() => {
+    const checkIfFavorite = async () => {
+      if (user && (city || country)) {
+        const favoritePlaces = await getFavoritePlaces(user.uid);
+        const isFavorite = (favoritePlaces ?? []).some(
+          (place) => place.place === city || place.place === country
+        );
+        setFavorite(isFavorite);
+      }
+    };
+    checkIfFavorite();
+  }, [city, country, user]);
+
   const handleAddRemovePlace = async () => {
     if (user) {
       if (added) {
@@ -58,7 +80,6 @@ const WeatherSearch = () => {
         if (placeId) {
           await removePlace(placeId, user.uid);
           setAdded(false);
-        } else {
         }
       } else {
         const newPlaceId = await addPlace(
@@ -70,6 +91,29 @@ const WeatherSearch = () => {
 
         setWeatherData((prev) => (prev ? { ...prev, id: newPlaceId } : null));
         setAdded(true);
+      }
+    }
+  };
+
+  const handleFavoritePlace = async () => {
+    if (user) {
+      if (favorite) {
+        const placeId = weatherData?.idFavorite;
+        if (placeId) {
+          await removeFavoritePlace(placeId, user.uid);
+          setFavorite(false);
+        }
+      } else {
+        const newFavoriteId = await addFavoritePlace(
+          {
+            place: city || country,
+          },
+          user.uid
+        );
+        setWeatherData((prev) =>
+          prev ? { ...prev, id: newFavoriteId } : null
+        );
+        setFavorite(true);
       }
     }
   };
@@ -86,28 +130,26 @@ const WeatherSearch = () => {
       setCountry(geo.country);
 
       let docId = "";
+      let docIdFavorite = "";
       if (user) {
         const savedPlaces = await getPlaces(user.uid);
+        const favoritePlaces = await getFavoritePlaces(user.uid);
         const found = (savedPlaces ?? []).find(
           (place) => place.place === geo.name || place.place === geo.country
         );
+        const foundFavorite = (favoritePlaces ?? []).find(
+          (place) => place.place === geo.name || place.place === geo.country
+        );
         docId = found?.id || "";
+        docIdFavorite = foundFavorite?.id || "";
       }
       setWeatherData({
         ...weather,
         id: docId,
+        idFavorite: docIdFavorite,
       });
       setLoading(false);
       setInput("");
-
-      if (user) {
-        const savedPlaces = await getPlaces(user.uid);
-        setAdded(
-          (savedPlaces ?? []).some(
-            (place) => place.place === geo.name || place.place === geo.country
-          )
-        );
-      }
     } catch {
       setError("Failed to find weather, please try again.");
       setLoading(false);
@@ -146,7 +188,9 @@ const WeatherSearch = () => {
             temperature={weatherData.current_weather.temperature}
             weather={label}
             isAdded={added}
+            isFavorite={favorite}
             onAddRemove={handleAddRemovePlace}
+            onFavorite={handleFavoritePlace}
           />
         )}
       </div>

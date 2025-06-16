@@ -28,3 +28,10 @@
     right: 10px;
     cursor: pointer;
 }
+
+.favorite {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+}
