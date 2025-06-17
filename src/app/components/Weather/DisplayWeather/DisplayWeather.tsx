@@ -35,8 +35,8 @@ const DisplayWeather = () => {
       const newFavoriteId = await addFavoritePlace(place, user.uid);
       if (newFavoriteId) {
         setFavoritePlaces((prevFavorites) => [
-          ...prevFavorites,
           { ...place, id: newFavoriteId },
+          ...prevFavorites,
         ]);
       }
     }

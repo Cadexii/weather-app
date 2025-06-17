@@ -77,6 +77,13 @@ const SavedWeatherDisplay: React.FC<Props> = ({
       setSavedPlaces((prevPlaces) =>
         prevPlaces.filter((place) => place.id !== placeId)
       );
+      setWeatherData((prevWeatherData) => {
+        const indexToRemove = savedPlaces.findIndex(
+          (place) => place.id === placeId
+        );
+        if (indexToRemove === -1) return prevWeatherData;
+        return prevWeatherData.filter((_, idx) => idx !== indexToRemove);
+      });
     }
   };
 
